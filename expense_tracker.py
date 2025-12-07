@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
-from datetime import datetime, date
+from datetime import date
 import json
 import os
 
@@ -36,15 +35,6 @@ if 'expenses' not in st.session_state:
 
 # Load expenses from file if it exists
 EXPENSE_FILE = 'expenses.json'
-
-def rerun():
-    """Rerun the Streamlit app - compatible with different versions"""
-    try:
-        # Try the newer rerun() method (Streamlit >= 1.18.0)
-        st.rerun()
-    except AttributeError:
-        # Fallback to experimental_rerun() for older versions
-        st.experimental_rerun()
 
 def load_expenses():
     """Load expenses from JSON file"""
@@ -93,7 +83,7 @@ with st.sidebar:
             st.session_state.expenses.append(new_expense)
             save_expenses(st.session_state.expenses)
             st.success(f"Added ₹{expense_amount:.2f} for {expense_description}!")
-            rerun()
+            st.rerun()
         else:
             st.error("Please enter a valid amount and description")
     
@@ -105,7 +95,7 @@ with st.sidebar:
             st.session_state.expenses = []
             save_expenses([])
             st.success("All expenses cleared!")
-            rerun()
+            st.rerun()
 
 # Main content area
 if st.session_state.expenses:
@@ -237,7 +227,7 @@ if st.session_state.expenses:
                         abs(exp['amount'] - expense_to_delete['amount']) < 0.01):
                         st.session_state.expenses.pop(i)
                         save_expenses(st.session_state.expenses)
-                        rerun()
+                        st.rerun()
                         break
     
     # Summary statistics
