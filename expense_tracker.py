@@ -38,6 +38,31 @@ st.markdown("""
         color: #1565c0 !important;
         font-weight: 500;
     }
+    /* Change Total Expenses label background color */
+    div[data-testid="stMetric"]:nth-of-type(1) [data-testid="stMetricLabel"] {
+        background-color: #e8f5e9 !important;
+        color: #1b5e20 !important;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        font-weight: 600;
+    }
+    /* Change metric value (price) background color for visibility */
+    [data-testid="stMetricValue"] {
+        background-color: #f5f5f5 !important;
+        color: #1976d2 !important;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-weight: 600;
+    }
+    /* Change price text in expense table for visibility */
+    div[data-testid="column"]:nth-of-type(4) p {
+        background-color: #e3f2fd !important;
+        color: #0d47a1 !important;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-weight: 600;
+        display: inline-block;
+    }
     </style>
     """, unsafe_allow_html=True)
 
