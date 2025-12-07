@@ -26,6 +26,18 @@ st.markdown("""
     h1 {
         color: #1f77b4;
     }
+    /* Change label backgrounds from white to light blue */
+    label {
+        background-color: #e3f2fd !important;
+    }
+    .stSelectbox label,
+    .stTextInput label,
+    .stDateInput label,
+    .stNumberInput label {
+        background-color: #e3f2fd !important;
+        color: #1565c0 !important;
+        font-weight: 500;
+    }
     </style>
     """, unsafe_allow_html=True)
 
