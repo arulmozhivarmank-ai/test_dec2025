@@ -1,0 +1,26 @@
+[
+  {
+    "date": "2025-12-07",
+    "category": "Food & Dining",
+    "description": "test",
+    "amount": 500.02
+  },
+  {
+    "date": "2025-12-07",
+    "category": "Food & Dining",
+    "description": "test",
+    "amount": 500.0
+  },
+  {
+    "date": "2025-12-07",
+    "category": "Food & Dining",
+    "description": "test",
+    "amount": 50.0
+  },
+  {
+    "date": "2025-12-07",
+    "category": "Transportation",
+    "description": "test",
+    "amount": 500.0
+  }
+]
