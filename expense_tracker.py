@@ -66,12 +66,16 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Initialize session state for expenses
+# Initialize session state for expenses and credits
 if 'expenses' not in st.session_state:
     st.session_state.expenses = []
 
+if 'credits' not in st.session_state:
+    st.session_state.credits = []
+
 # Load expenses from file if it exists
 EXPENSE_FILE = 'expenses.json'
+CREDITS_FILE = 'credits.json'
 
 def load_expenses():
     """Load expenses from JSON file"""
@@ -88,9 +92,27 @@ def save_expenses(expenses):
     with open(EXPENSE_FILE, 'w') as f:
         json.dump(expenses, f, indent=2, default=str)
 
-# Load expenses on startup
+def load_credits():
+    """Load credits from JSON file"""
+    if os.path.exists(CREDITS_FILE):
+        try:
+            with open(CREDITS_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return []
+    return []
+
+def save_credits(credits):
+    """Save credits to JSON file"""
+    with open(CREDITS_FILE, 'w') as f:
+        json.dump(credits, f, indent=2, default=str)
+
+# Load expenses and credits on startup
 if not st.session_state.expenses:
     st.session_state.expenses = load_expenses()
+
+if not st.session_state.credits:
+    st.session_state.credits = load_credits()
 
 # Title
 st.title("💰 CGT Monthly Expense Tracker")
@@ -162,6 +184,28 @@ with st.sidebar:
     
     st.markdown("---")
     
+    # Add Credit section
+    st.header("💳 Add Credit")
+    credit_date = st.date_input("Credit Date", value=date.today(), key="credit_date")
+    credit_amount = st.number_input("Credit Amount (₹)", min_value=0.0, step=0.01, format="%.2f", key="credit_amount")
+    credit_description = st.text_input("Credit Description", key="credit_description")
+    
+    if st.button("Add Credit", type="primary", key="add_credit"):
+        if credit_amount > 0 and credit_description:
+            new_credit = {
+                "date": credit_date.isoformat(),
+                "description": credit_description,
+                "amount": float(credit_amount)
+            }
+            st.session_state.credits.append(new_credit)
+            save_credits(st.session_state.credits)
+            st.success(f"Added credit ₹{credit_amount:.2f} for {credit_description}!")
+            st.rerun()
+        else:
+            st.error("Please enter a valid amount and description")
+    
+    st.markdown("---")
+    
     # Clear all expenses button
     if st.button("🗑️ Clear All Expenses", type="secondary"):
         if st.session_state.expenses:
@@ -189,12 +233,26 @@ if st.session_state.expenses:
     # Filter data for selected month
     month_df = df[df['month_str'] == selected_month].copy()
     
+    # Process credits data
+    if st.session_state.credits:
+        credits_df = pd.DataFrame(st.session_state.credits)
+        credits_df['date'] = pd.to_datetime(credits_df['date'])
+        credits_df['month'] = credits_df['date'].dt.to_period('M')
+        credits_df['month_str'] = credits_df['month'].astype(str)
+        month_credits_df = credits_df[credits_df['month_str'] == selected_month].copy()
+        total_credits = month_credits_df['amount'].sum()
+    else:
+        total_credits = 0.0
+    
     # Calculate metrics
     total_expenses = month_df['amount'].sum()
     avg_daily = month_df.groupby(month_df['date'].dt.day)['amount'].sum().mean()
     num_transactions = len(month_df)
     top_subcategory = month_df.groupby('subcategory')['amount'].sum().idxmax()
     top_subcategory_amount = month_df.groupby('subcategory')['amount'].sum().max()
+    
+    # Calculate balance
+    balance = total_credits - total_expenses
     
     # Display metrics
     col1, col2, col3, col4 = st.columns(4)
@@ -206,6 +264,18 @@ if st.session_state.expenses:
         st.metric("Transactions", num_transactions)
     with col4:
         st.metric("Top Sub Category", f"{top_subcategory}\n₹{top_subcategory_amount:.2f}")
+    
+    # Display balance after expenses
+    st.markdown("---")
+    st.subheader("💰 Balance Summary")
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col1:
+        st.metric("Total Credits", f"₹{total_credits:,.2f}")
+    with col2:
+        st.metric("Total Expenses", f"₹{total_expenses:,.2f}")
+    with col3:
+        # Display balance
+        st.metric("Balance", f"₹{balance:,.2f}")
     
     st.markdown("---")
     
