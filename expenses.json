@@ -1,26 +1,37 @@
 [
   {
-    "date": "2025-12-07",
-    "category": "Food & Dining",
-    "description": "test",
-    "amount": 500.02
-  },
-  {
-    "date": "2025-12-07",
-    "category": "Food & Dining",
-    "description": "test",
+    "date": "2025-12-08",
+    "category": "\ud83d\uded2 Purchases",
+    "subcategory": "PUR-ELEC",
+    "description": "MCB",
     "amount": 500.0
   },
   {
-    "date": "2025-12-07",
-    "category": "Food & Dining",
-    "description": "test",
-    "amount": 50.0
+    "date": "2025-12-08",
+    "category": "\ud83d\udc68\u200d\ud83c\udf3e Staff Payments",
+    "subcategory": "SAL-INT",
+    "description": "Salary",
+    "amount": 5000.0
   },
   {
-    "date": "2025-12-07",
-    "category": "Transportation",
-    "description": "test",
+    "date": "2025-12-08",
+    "category": "\ud83d\udc68\u200d\ud83c\udf3e Staff Payments",
+    "subcategory": "SAL-BONUS",
+    "description": "bonus",
+    "amount": 10000.0
+  },
+  {
+    "date": "2025-12-03",
+    "category": "\ud83c\udfd7\ufe0f Maintenance Expenses",
+    "subcategory": "MAINT-STP",
+    "description": "STP clear",
+    "amount": 2500.0
+  },
+  {
+    "date": "2025-12-03",
+    "category": "\ud83c\udfd7\ufe0f Maintenance Expenses",
+    "subcategory": "MAINT-ELE",
+    "description": "ect",
     "amount": 500.0
   }
 ]
