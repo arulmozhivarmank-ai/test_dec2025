@@ -93,8 +93,40 @@ if not st.session_state.expenses:
     st.session_state.expenses = load_expenses()
 
 # Title
-st.title("💰 Monthly Expense Tracker")
+st.title("💰 CGT Monthly Expense Tracker")
 st.markdown("Track and visualize your monthly expenses")
+
+# Category definitions
+CATEGORY_OPTIONS = {
+    "🏗️ Maintenance Expenses": [
+        "MAINT-CIV",
+        "MAINT-ELE",
+        "MAINT-STP",
+        "MAINT-GEN",
+        "MAINT-HK",
+        "MAINT-CLB",
+    ],
+    "👨‍🌾 Staff Payments": [
+        "SAL-INT",
+        "SAL-EXT",
+        "SAL-BONUS",
+        "SAL-CONV",
+    ],
+    "🛒 Purchases": [
+        "PUR-MTRL",
+        "PUR-ELEC",
+        "PUR-GARD",
+        "PUR-OFF",
+        "PUR-HK",
+        "PUR-WATER",
+        "PUR-PRINT",
+    ],
+    "💳 Cash Flow / Credit Transactions": [
+        "CASH-WD",
+        "CASH-CR",
+        "CREDIT",
+    ],
+}
 
 # Sidebar for adding expenses
 with st.sidebar:
@@ -102,9 +134,12 @@ with st.sidebar:
     
     expense_date = st.date_input("Date", value=date.today())
     expense_category = st.selectbox(
-        "Category",
-        ["Food & Dining", "Transportation", "Shopping", "Bills & Utilities", 
-         "Entertainment", "Healthcare", "Education", "Travel", "Other"]
+        "Account Category",
+        list(CATEGORY_OPTIONS.keys())
+    )
+    expense_subcategory = st.selectbox(
+        "Sub Category",
+        CATEGORY_OPTIONS[expense_category]
     )
     expense_description = st.text_input("Description")
     expense_amount = st.number_input("Amount (₹)", min_value=0.0, step=0.01, format="%.2f")
@@ -114,6 +149,7 @@ with st.sidebar:
             new_expense = {
                 "date": expense_date.isoformat(),
                 "category": expense_category,
+                "subcategory": expense_subcategory,
                 "description": expense_description,
                 "amount": float(expense_amount)
             }
@@ -139,6 +175,10 @@ if st.session_state.expenses:
     # Convert to DataFrame
     df = pd.DataFrame(st.session_state.expenses)
     df['date'] = pd.to_datetime(df['date'])
+    if 'category' not in df.columns:
+        df['category'] = "Uncategorized"
+    if 'subcategory' not in df.columns:
+        df['subcategory'] = df['category']
     df['month'] = df['date'].dt.to_period('M')
     df['month_str'] = df['month'].astype(str)
     
@@ -153,8 +193,8 @@ if st.session_state.expenses:
     total_expenses = month_df['amount'].sum()
     avg_daily = month_df.groupby(month_df['date'].dt.day)['amount'].sum().mean()
     num_transactions = len(month_df)
-    top_category = month_df.groupby('category')['amount'].sum().idxmax()
-    top_category_amount = month_df.groupby('category')['amount'].sum().max()
+    top_subcategory = month_df.groupby('subcategory')['amount'].sum().idxmax()
+    top_subcategory_amount = month_df.groupby('subcategory')['amount'].sum().max()
     
     # Display metrics
     col1, col2, col3, col4 = st.columns(4)
@@ -165,7 +205,7 @@ if st.session_state.expenses:
     with col3:
         st.metric("Transactions", num_transactions)
     with col4:
-        st.metric("Top Category", f"{top_category}\n₹{top_category_amount:.2f}")
+        st.metric("Top Sub Category", f"{top_subcategory}\n₹{top_subcategory_amount:.2f}")
     
     st.markdown("---")
     
@@ -174,7 +214,7 @@ if st.session_state.expenses:
     
     with col1:
         st.subheader("Expenses by Category")
-        category_sum = month_df.groupby('category')['amount'].sum().sort_values(ascending=False)
+        category_sum = month_df.groupby('subcategory')['amount'].sum().sort_values(ascending=False)
         fig_pie = px.pie(
             values=category_sum.values,
             names=category_sum.index,
@@ -202,7 +242,7 @@ if st.session_state.expenses:
     
     # Category breakdown bar chart
     st.subheader("Category Breakdown")
-    category_sum = month_df.groupby('category')['amount'].sum().sort_values(ascending=True)
+    category_sum = month_df.groupby('subcategory')['amount'].sum().sort_values(ascending=True)
     fig_bar = px.bar(
         x=category_sum.values,
         y=category_sum.index,
@@ -238,30 +278,34 @@ if st.session_state.expenses:
     
     # Create a table with delete buttons
     for display_idx, (df_idx, row) in enumerate(month_df_sorted.iterrows()):
-        col1, col2, col3, col4, col5 = st.columns([2, 2, 3, 2, 1])
+        col1, col2, col3, col4, col5, col6 = st.columns([2, 2.5, 2.5, 3, 2, 1])
         with col1:
             st.write(row['date'].strftime('%Y-%m-%d'))
         with col2:
             st.write(row['category'])
         with col3:
-            st.write(row['description'])
+            st.write(row['subcategory'])
         with col4:
-            st.write(f"₹{row['amount']:.2f}")
+            st.write(row['description'])
         with col5:
+            st.write(f"₹{row['amount']:.2f}")
+        with col6:
             # Find the expense in the original list by matching all fields
             expense_to_delete = {
                 "date": row['date'].date().isoformat(),
                 "category": row['category'],
+                "subcategory": row['subcategory'],
                 "description": row['description'],
                 "amount": row['amount']
             }
             if st.button("🗑️", key=f"delete_{df_idx}_{display_idx}"):
                 # Remove the matching expense from the list
                 for i, exp in enumerate(st.session_state.expenses):
-                    if (exp['date'] == expense_to_delete['date'] and
-                        exp['category'] == expense_to_delete['category'] and
-                        exp['description'] == expense_to_delete['description'] and
-                        abs(exp['amount'] - expense_to_delete['amount']) < 0.01):
+                    if (exp.get('date') == expense_to_delete['date'] and
+                        exp.get('category') == expense_to_delete['category'] and
+                        exp.get('subcategory', exp.get('category')) == expense_to_delete['subcategory'] and
+                        exp.get('description') == expense_to_delete['description'] and
+                        abs(exp.get('amount', 0) - expense_to_delete['amount']) < 0.01):
                         st.session_state.expenses.pop(i)
                         save_expenses(st.session_state.expenses)
                         st.rerun()
@@ -276,6 +320,7 @@ if st.session_state.expenses:
         st.write(f"**Smallest Expense:** ₹{month_df['amount'].min():.2f}")
         
         st.write("\n**Category Breakdown:**")
+        # Category breakdown (by Account Category)
         category_stats = month_df.groupby('category').agg({
             'amount': ['sum', 'count', 'mean']
         }).round(2)
