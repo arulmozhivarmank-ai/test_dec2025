@@ -58,20 +58,36 @@ def login_page():
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 80vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100vh;
+        background-color: rgba(255, 255, 255, 0.95);
+        z-index: 9999;
     }
     .login-box {
         background-color: #f0f2f6;
         padding: 3rem;
         border-radius: 1rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         max-width: 400px;
         width: 100%;
+        margin: auto;
     }
     h1 {
         text-align: center;
         color: #1f77b4;
         margin-bottom: 2rem;
+    }
+    /* Hide Streamlit default elements */
+    .stApp header, .stApp footer, .stApp .main .block-container {
+        display: none !important;
+    }
+    .stApp .main {
+        padding: 0 !important;
     }
     </style>
     """, unsafe_allow_html=True)
