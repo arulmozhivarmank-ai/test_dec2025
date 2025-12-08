@@ -7,10 +7,134 @@ import os
 
 # Set the page title and configuration
 st.set_page_config(
-    page_title='Monthly Expense Tracker',
+    page_title='CGT Monthly Expense Tracker',
     page_icon='💰',
     layout='wide'
 )
+
+# Default credentials
+DEFAULT_USERID = "admin"
+DEFAULT_PASSWORD = "password"  # Change this to your desired default password
+PASSWORD_FILE = 'credentials.json'
+
+# Initialize authentication in session state
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
+if 'userid' not in st.session_state:
+    st.session_state.userid = None
+if 'show_change_password' not in st.session_state:
+    st.session_state.show_change_password = False
+
+def load_credentials():
+    """Load credentials from JSON file"""
+    if os.path.exists(PASSWORD_FILE):
+        try:
+            with open(PASSWORD_FILE, 'r') as f:
+                creds = json.load(f)
+                return creds.get('userid', DEFAULT_USERID), creds.get('password', DEFAULT_PASSWORD)
+        except:
+            return DEFAULT_USERID, DEFAULT_PASSWORD
+    return DEFAULT_USERID, DEFAULT_PASSWORD
+
+def save_credentials(userid, password):
+    """Save credentials to JSON file"""
+    creds = {
+        'userid': userid,
+        'password': password
+    }
+    with open(PASSWORD_FILE, 'w') as f:
+        json.dump(creds, f, indent=2)
+
+def check_credentials(userid, password):
+    """Check if credentials are valid"""
+    stored_userid, stored_password = load_credentials()
+    return userid == stored_userid and password == stored_password
+
+def login_page():
+    """Display login page"""
+    st.markdown("""
+    <style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+    }
+    .login-box {
+        background-color: #f0f2f6;
+        padding: 3rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 100%;
+    }
+    h1 {
+        text-align: center;
+        color: #1f77b4;
+        margin-bottom: 2rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown('<div class="login-container">', unsafe_allow_html=True)
+    st.markdown('<div class="login-box">', unsafe_allow_html=True)
+    
+    st.title("🔐 Login")
+    st.markdown("---")
+    
+    # Login form
+    with st.form("login_form"):
+        userid = st.text_input("User ID", placeholder="Enter your user ID")
+        password = st.text_input("Password", type="password", placeholder="Enter your password")
+        submit_button = st.form_submit_button("Login", type="primary", use_container_width=True)
+        
+        if submit_button:
+            if check_credentials(userid, password):
+                st.session_state.authenticated = True
+                st.session_state.userid = userid
+                st.success("Login successful!")
+                st.rerun()
+            else:
+                st.error("Invalid user ID or password. Please try again.")
+    
+    st.markdown("---")
+    
+    # Password change section
+    with st.expander("🔑 Change Password"):
+        with st.form("change_password_form"):
+            st.markdown("**Change Password**")
+            stored_userid, stored_password = load_credentials()
+            
+            change_userid = st.text_input("User ID", value=stored_userid, key="change_userid")
+            old_password = st.text_input("Current Password", type="password", placeholder="Enter current password", key="old_password")
+            new_password = st.text_input("New Password", type="password", placeholder="Enter new password", key="new_password")
+            confirm_password = st.text_input("Confirm New Password", type="password", placeholder="Confirm new password", key="confirm_password")
+            
+            change_button = st.form_submit_button("Change Password", type="primary", use_container_width=True)
+            
+            if change_button:
+                # Validate inputs
+                if not change_userid or not old_password or not new_password or not confirm_password:
+                    st.error("Please fill in all fields.")
+                elif not check_credentials(change_userid, old_password):
+                    st.error("Current password is incorrect.")
+                elif new_password != confirm_password:
+                    st.error("New password and confirm password do not match.")
+                elif len(new_password) < 4:
+                    st.error("New password must be at least 4 characters long.")
+                else:
+                    # Save new credentials
+                    save_credentials(change_userid, new_password)
+                    st.success("Password changed successfully! Please login with your new password.")
+                    st.session_state.show_change_password = False
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Check authentication
+if not st.session_state.authenticated:
+    login_page()
+    st.stop()
 
 # Custom CSS for better styling
 st.markdown("""
@@ -152,6 +276,14 @@ CATEGORY_OPTIONS = {
 
 # Sidebar for adding expenses
 with st.sidebar:
+    # User info and logout
+    st.markdown(f"**Logged in as:** {st.session_state.userid}")
+    if st.button("🚪 Logout", type="secondary", use_container_width=True):
+        st.session_state.authenticated = False
+        st.session_state.userid = None
+        st.rerun()
+    st.markdown("---")
+    
     st.header("➕ Add New Expense")
     
     expense_date = st.date_input("Date", value=date.today())
