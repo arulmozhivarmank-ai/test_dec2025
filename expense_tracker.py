@@ -58,90 +58,141 @@ def login_page():
         display: flex;
         justify-content: center;
         align-items: center;
-        position: fixed;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+    }
+    .login-box {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 3rem;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        max-width: 420px;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    .login-box::before {
+        content: '';
+        position: absolute;
         top: 0;
         left: 0;
         right: 0;
-        bottom: 0;
-        width: 100%;
-        height: 100vh;
-        background-color: rgba(255, 255, 255, 0.95);
-        z-index: 9999;
-    }
-    .login-box {
-        background-color: #f0f2f6;
-        padding: 3rem;
-        border-radius: 1rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        max-width: 400px;
-        width: 100%;
-        margin: auto;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
     }
     h1 {
         text-align: center;
-        color: #1f77b4;
+        color: #333;
         margin-bottom: 2rem;
+        font-size: 2.5rem;
+        font-weight: 300;
     }
-    /* Hide Streamlit default elements */
-    .stApp header, .stApp footer, .stApp .main .block-container {
-        display: none !important;
+    .login-title {
+        text-align: center;
+        color: #667eea;
+        font-size: 2.8rem;
+        margin-bottom: 1rem;
+        font-weight: 400;
     }
-    .stApp .main {
-        padding: 0 !important;
+    .login-subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+    }
+    .stButton button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 25px !important;
+        padding: 12px 30px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+    }
+    .stButton button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3) !important;
+    }
+    .stTextInput input {
+        border-radius: 12px !important;
+        border: 2px solid #e1e5e9 !important;
+        padding: 12px 16px !important;
+        transition: all 0.3s ease !important;
+    }
+    .stTextInput input:focus {
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+    }
+    .stExpander {
+        border-radius: 12px !important;
+        border: 1px solid #e1e5e9 !important;
+        background: rgba(255, 255, 255, 0.8) !important;
+    }
+    .stExpander > div:first-child {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+        color: white !important;
+        border-radius: 12px !important;
     }
     </style>
     """, unsafe_allow_html=True)
     
     st.markdown('<div class="login-container">', unsafe_allow_html=True)
     st.markdown('<div class="login-box">', unsafe_allow_html=True)
-    
-    st.title("🔐 Login")
+
+    st.markdown('<h1 class="login-title">💰 CGT Expense Tracker</h1>', unsafe_allow_html=True)
+    st.markdown('<div class="login-subtitle">Secure access to your financial dashboard</div>', unsafe_allow_html=True)
     st.markdown("---")
     
     # Login form
     with st.form("login_form"):
-        userid = st.text_input("User ID", placeholder="Enter your user ID")
-        password = st.text_input("Password", type="password", placeholder="Enter your password")
-        submit_button = st.form_submit_button("Login", type="primary", use_container_width=True)
-        
+        st.markdown("### 🔐 Please Sign In")
+        userid = st.text_input("👤 User ID", placeholder="Enter your user ID", key="login_userid")
+        password = st.text_input("🔒 Password", type="password", placeholder="Enter your password", key="login_password")
+        submit_button = st.form_submit_button("🚀 Login", type="primary", use_container_width=True)
+
         if submit_button:
             if check_credentials(userid, password):
                 st.session_state.authenticated = True
                 st.session_state.userid = userid
-                st.success("Login successful!")
+                st.success("🎉 Login successful! Redirecting...")
+                st.balloons()
                 st.rerun()
             else:
-                st.error("Invalid user ID or password. Please try again.")
+                st.error("❌ Invalid user ID or password. Please try again.")
     
     st.markdown("---")
     
     # Password change section
     with st.expander("🔑 Change Password"):
         with st.form("change_password_form"):
-            st.markdown("**Change Password**")
+            st.markdown("### 🔄 Update Your Credentials")
             stored_userid, stored_password = load_credentials()
-            
-            change_userid = st.text_input("User ID", value=stored_userid, key="change_userid")
-            old_password = st.text_input("Current Password", type="password", placeholder="Enter current password", key="old_password")
-            new_password = st.text_input("New Password", type="password", placeholder="Enter new password", key="new_password")
-            confirm_password = st.text_input("Confirm New Password", type="password", placeholder="Confirm new password", key="confirm_password")
-            
-            change_button = st.form_submit_button("Change Password", type="primary", use_container_width=True)
-            
+
+            change_userid = st.text_input("👤 User ID", value=stored_userid, key="change_userid")
+            old_password = st.text_input("🔒 Current Password", type="password", placeholder="Enter current password", key="old_password")
+            new_password = st.text_input("🆕 New Password", type="password", placeholder="Enter new password", key="new_password")
+            confirm_password = st.text_input("✅ Confirm New Password", type="password", placeholder="Confirm new password", key="confirm_password")
+
+            change_button = st.form_submit_button("💾 Update Password", type="primary", use_container_width=True)
+
             if change_button:
                 # Validate inputs
                 if not change_userid or not old_password or not new_password or not confirm_password:
-                    st.error("Please fill in all fields.")
+                    st.error("❌ Please fill in all fields.")
                 elif not check_credentials(change_userid, old_password):
-                    st.error("Current password is incorrect.")
+                    st.error("❌ Current password is incorrect.")
                 elif new_password != confirm_password:
-                    st.error("New password and confirm password do not match.")
+                    st.error("❌ New password and confirm password do not match.")
                 elif len(new_password) < 4:
-                    st.error("New password must be at least 4 characters long.")
+                    st.error("❌ New password must be at least 4 characters long.")
                 else:
                     # Save new credentials
                     save_credentials(change_userid, new_password)
-                    st.success("Password changed successfully! Please login with your new password.")
+                    st.success("✅ Password changed successfully! Please login with your new password.")
                     st.session_state.show_change_password = False
     
     st.markdown('</div>', unsafe_allow_html=True)
