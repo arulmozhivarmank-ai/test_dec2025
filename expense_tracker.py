@@ -275,6 +275,18 @@ if st.session_state.expenses:
     
     # Sort by date descending
     month_df_sorted = month_df.sort_values('date', ascending=False).reset_index(drop=True)
+
+    # Download CSV for current month
+    export_cols = ['date', 'category', 'subcategory', 'description', 'amount']
+    export_df = month_df_sorted.copy()
+    export_df['date'] = export_df['date'].dt.strftime('%Y-%m-%d')
+    csv_bytes = export_df[export_cols].to_csv(index=False).encode('utf-8')
+    st.download_button(
+        "⬇️ Export CSV",
+        data=csv_bytes,
+        file_name=f"expenses_{selected_month}.csv",
+        mime="text/csv"
+    )
     
     # Create a table with delete buttons
     for display_idx, (df_idx, row) in enumerate(month_df_sorted.iterrows()):

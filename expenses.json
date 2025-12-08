@@ -19,5 +19,19 @@
     "subcategory": "SAL-BONUS",
     "description": "bonus",
     "amount": 10000.0
+  },
+  {
+    "date": "2025-12-03",
+    "category": "\ud83c\udfd7\ufe0f Maintenance Expenses",
+    "subcategory": "MAINT-STP",
+    "description": "STP clear",
+    "amount": 2500.0
+  },
+  {
+    "date": "2025-12-03",
+    "category": "\ud83c\udfd7\ufe0f Maintenance Expenses",
+    "subcategory": "MAINT-ELE",
+    "description": "ect",
+    "amount": 500.0
   }
 ]
