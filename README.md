@@ -1,71 +1,192 @@
-# Stock Tracker using Python
+# 💰 CGT Monthly Expense Tracker
 
-This repository contains code for a simple stock tracker web application built with Python and Streamlit. The application allows users to track the stock prices of various companies using the `yfinance` library and visualizes the data using line charts and tables.
+A comprehensive web application built with Streamlit for tracking and visualizing monthly expenses. This application helps you manage your expenses with detailed categorization, interactive charts, and data export capabilities.
+
+## Features
+
+### ✨ Core Functionality
+
+- **➕ Add Expenses**: Easily add new expenses with date, category, subcategory, description, and amount
+- **📊 Monthly Analytics**: View detailed metrics including total expenses, average daily expenses, transaction count, and top spending categories
+- **📈 Interactive Visualizations**: 
+  - Pie chart showing expense distribution by subcategory
+  - Line chart displaying daily spending trends
+  - Horizontal bar chart for category breakdown
+  - Monthly comparison chart (when multiple months available)
+- **🗑️ Expense Management**: Delete individual expenses directly from the table
+- **💾 Data Persistence**: Automatic saving to JSON file (`expenses.json`)
+- **📥 CSV Export**: Export expense details for the selected month as CSV file
+- **📱 Responsive Design**: Modern, clean UI with custom styling
+
+### 🎨 Categories & Subcategories
+
+The application supports the following expense categories:
+
+#### 🏗️ Maintenance Expenses
+- MAINT-CIV (Civil Maintenance)
+- MAINT-ELE (Electrical Maintenance)
+- MAINT-STP (STP Maintenance)
+- MAINT-GEN (General Maintenance)
+- MAINT-HK (Housekeeping Maintenance)
+- MAINT-CLB (Club Maintenance)
+
+#### 👨‍🌾 Staff Payments
+- SAL-INT (Internal Salary)
+- SAL-EXT (External Salary)
+- SAL-BONUS (Bonus Payments)
+- SAL-CONV (Conveyance)
+
+#### 🛒 Purchases
+- PUR-MTRL (Materials)
+- PUR-ELEC (Electronics)
+- PUR-GARD (Garden Supplies)
+- PUR-OFF (Office Supplies)
+- PUR-HK (Housekeeping Supplies)
+- PUR-WATER (Water)
+- PUR-PRINT (Printing)
+
+#### 💳 Cash Flow / Credit Transactions
+- CASH-WD (Cash Withdrawal)
+- CASH-CR (Cash Credit)
+- CREDIT (Credit Transactions)
 
 ## Installation
 
-To run the stock tracker application locally, follow these steps:
+### Prerequisites
 
-1. Clone the repository:
+- Python 3.9 or higher
+- pip (Python package installer)
 
-   ```shell
-   git clone https://github.com/<username>/<repository>.git
+### Steps
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/arulmozhivarmank-ai/test_dec2025.git
+   cd test_dec2025
    ```
 
-2. Navigate to the project directory:
-
-   ```shell
-   cd <repository>
-   ```
-
-3. Install the required dependencies using pip:
-
-   ```shell
+2. **Install dependencies**:
+   ```bash
    pip install -r requirements.txt
    ```
-
-4. Run the application:
-
-   ```shell
-   streamlit run app.py
+   
+   Or use pip3:
+   ```bash
+   pip3 install -r requirements.txt
    ```
 
-   The application will be accessible at [http://localhost:8501](http://localhost:8501) in your web browser.
+3. **Run the application**:
+   ```bash
+   streamlit run expense_tracker.py
+   ```
+
+4. **Access the application**:
+   The application will automatically open in your default web browser at `http://localhost:8501`
 
 ## Usage
 
-1. Open the application in your web browser.
+### Adding an Expense
 
-2. Enter the stock ticker symbol in the text input box (e.g., AAPL for Apple Inc., INTC for Intel Corporation).
+1. Use the sidebar on the left to add a new expense
+2. Select the date (defaults to today)
+3. Choose the **Account Category** from the dropdown
+4. Select the appropriate **Sub Category**
+5. Enter a description for the expense
+6. Enter the amount in ₹ (Indian Rupees)
+7. Click **"Add Expense"** button
 
-3. Press Enter or click outside the input box to update the visualization.
+### Viewing Expenses
 
-4. The application will display a line chart representing the closing prices of the stock over time.
+- The main dashboard displays all expenses for the selected month
+- Use the **"Select Month"** dropdown to view expenses for different months
+- View key metrics at the top:
+  - Total Expenses
+  - Average Daily Expense
+  - Number of Transactions
+  - Top Sub Category
 
-5. Additionally, a table containing the stock data will be displayed below the chart.
+### Visualizations
 
-## About the Code
+- **Expenses by Category**: Pie chart showing the distribution of expenses across subcategories
+- **Daily Expenses Trend**: Line chart tracking daily spending throughout the month
+- **Category Breakdown**: Horizontal bar chart comparing expenses by subcategory
+- **Monthly Comparison**: Bar chart comparing total expenses across multiple months (if available)
 
-The main code file `app.py` contains the following components:
+### Managing Expenses
 
-- Importing the required libraries: `streamlit`, `yfinance`, and `pandas`.
-- Setting the page title and background image using Streamlit's `set_page_config` and `markdown` functions.
-- Defining a function `get_stock_data` that uses the `yf.download` function from `yfinance` to retrieve stock data for a given ticker symbol.
-- Using Streamlit's `sidebar` and `text_input` functions to allow users to input a stock ticker.
-- Calling the `get_stock_data` function to retrieve the stock data for the entered ticker.
-- Displaying the stock data in a line chart using Streamlit's `line_chart` function.
-- Displaying the stock data in a table using Streamlit's `write` function.
+- **Delete an Expense**: Click the 🗑️ button next to any expense in the Expense Details table
+- **Clear All Expenses**: Use the **"Clear All Expenses"** button in the sidebar (use with caution!)
 
-## Additional Information
+### Exporting Data
 
-The stock tracker application is deployed using Streamlit and can be accessed online at [Stock Tracker App](https://deepankarvarma-stock-tracker-using-python-app-sos8ew.streamlit.app/).
+- Click the **"⬇️ Export CSV"** button above the Expense Details table
+- The CSV file will include all expenses for the selected month with columns:
+  - Date
+  - Category
+  - Sub Category
+  - Description
+  - Amount
 
-For more information about Streamlit, refer to the [Streamlit documentation](https://docs.streamlit.io/).
+### Summary Statistics
+
+Click on the **"📊 Summary Statistics"** expander to view:
+- Total expenses for the month
+- Number of transactions
+- Average transaction amount
+- Largest and smallest expenses
+- Category breakdown table with totals, counts, and averages
+
+## Project Structure
+
+```
+test_dec2025/
+├── expense_tracker.py    # Main application file
+├── expenses.json         # Data storage file (auto-generated)
+├── requirements.txt      # Python dependencies
+├── README.md            # This file
+└── DEPLOYMENT.md        # Deployment documentation
+```
+
+## Technology Stack
+
+- **Streamlit**: Web framework for building the application
+- **Pandas**: Data manipulation and analysis
+- **Plotly Express**: Interactive data visualization
+- **JSON**: Data persistence
+
+## Dependencies
+
+- `pandas>=2.0.0`
+- `streamlit>=1.40.0`
+- `numpy>=1.24.0`
+- `plotly>=5.17.0`
+
+## Data Storage
+
+Expenses are automatically saved to `expenses.json` in the project root directory. The file is created automatically when you add your first expense. The data persists between application restarts.
+
+## Customization
+
+The application includes custom CSS styling for:
+- Metric cards with rounded corners
+- Colored labels for better visibility
+- Highlighted Total Expenses metric (green background)
+- Styled price values for better readability
 
 ## Contributing
 
-Contributions to the repository are welcome. If you find any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request.
+Contributions are welcome! If you find any issues or have suggestions for improvements, please feel free to:
+1. Open an issue describing the problem or feature request
+2. Submit a pull request with your changes
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the MIT License.
+
+## Support
+
+For questions or issues, please open an issue on the GitHub repository.
+
+---
+
+**Note**: This application is designed for tracking expenses in Indian Rupees (₹). The currency symbol can be modified in the code if needed for other currencies.
