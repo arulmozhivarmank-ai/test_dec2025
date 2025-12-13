@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Database files (local only - will be created on cloud)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.backup
+
+# JSON data files (will be created on cloud)
+credentials.json
+expenses.json
+credits.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml

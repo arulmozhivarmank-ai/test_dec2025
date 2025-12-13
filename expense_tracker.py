@@ -4,6 +4,7 @@ import plotly.express as px
 from datetime import date
 import json
 import os
+import database
 
 # Set the page title and configuration
 st.set_page_config(
@@ -12,10 +13,8 @@ st.set_page_config(
     layout='wide'
 )
 
-# Default credentials
-DEFAULT_USERID = "admin"
-DEFAULT_PASSWORD = "password"  # Change this to your desired default password
-PASSWORD_FILE = 'credentials.json'
+# Initialize database on startup
+database.init_database()
 
 # Initialize authentication in session state
 if 'authenticated' not in st.session_state:
@@ -25,29 +24,9 @@ if 'userid' not in st.session_state:
 if 'show_change_password' not in st.session_state:
     st.session_state.show_change_password = False
 
-def load_credentials():
-    """Load credentials from JSON file"""
-    if os.path.exists(PASSWORD_FILE):
-        try:
-            with open(PASSWORD_FILE, 'r') as f:
-                creds = json.load(f)
-                return creds.get('userid', DEFAULT_USERID), creds.get('password', DEFAULT_PASSWORD)
-        except:
-            return DEFAULT_USERID, DEFAULT_PASSWORD
-    return DEFAULT_USERID, DEFAULT_PASSWORD
-
-def save_credentials(userid, password):
-    """Save credentials to JSON file"""
-    creds = {
-        'userid': userid,
-        'password': password
-    }
-    with open(PASSWORD_FILE, 'w') as f:
-        json.dump(creds, f, indent=2)
-
 def check_credentials(userid, password):
     """Check if credentials are valid"""
-    stored_userid, stored_password = load_credentials()
+    stored_userid, stored_password = database.get_credentials()
     return userid == stored_userid and password == stored_password
 
 def login_page():
@@ -170,7 +149,7 @@ def login_page():
     with st.expander("🔑 Change Password"):
         with st.form("change_password_form"):
             st.markdown("### 🔄 Update Your Credentials")
-            stored_userid, stored_password = load_credentials()
+            stored_userid, stored_password = database.get_credentials()
 
             change_userid = st.text_input("👤 User ID", value=stored_userid, key="change_userid")
             old_password = st.text_input("🔒 Current Password", type="password", placeholder="Enter current password", key="old_password")
@@ -191,7 +170,7 @@ def login_page():
                     st.error("❌ New password must be at least 4 characters long.")
                 else:
                     # Save new credentials
-                    save_credentials(change_userid, new_password)
+                    database.update_credentials(change_userid, new_password)
                     st.success("✅ Password changed successfully! Please login with your new password.")
                     st.session_state.show_change_password = False
     
@@ -264,46 +243,12 @@ if 'expenses' not in st.session_state:
 if 'credits' not in st.session_state:
     st.session_state.credits = []
 
-# Load expenses from file if it exists
-EXPENSE_FILE = 'expenses.json'
-CREDITS_FILE = 'credits.json'
-
-def load_expenses():
-    """Load expenses from JSON file"""
-    if os.path.exists(EXPENSE_FILE):
-        try:
-            with open(EXPENSE_FILE, 'r') as f:
-                return json.load(f)
-        except:
-            return []
-    return []
-
-def save_expenses(expenses):
-    """Save expenses to JSON file"""
-    with open(EXPENSE_FILE, 'w') as f:
-        json.dump(expenses, f, indent=2, default=str)
-
-def load_credits():
-    """Load credits from JSON file"""
-    if os.path.exists(CREDITS_FILE):
-        try:
-            with open(CREDITS_FILE, 'r') as f:
-                return json.load(f)
-        except:
-            return []
-    return []
-
-def save_credits(credits):
-    """Save credits to JSON file"""
-    with open(CREDITS_FILE, 'w') as f:
-        json.dump(credits, f, indent=2, default=str)
-
-# Load expenses and credits on startup
+# Load expenses and credits from database on startup
 if not st.session_state.expenses:
-    st.session_state.expenses = load_expenses()
+    st.session_state.expenses = database.get_all_expenses()
 
 if not st.session_state.credits:
-    st.session_state.credits = load_credits()
+    st.session_state.credits = database.get_all_credits()
 
 # Title
 st.title("💰 CGT Monthly Expense Tracker")
@@ -367,7 +312,17 @@ with st.sidebar:
     
     if st.button("Add Expense", type="primary"):
         if expense_amount > 0 and expense_description:
+            # Add to database
+            expense_id = database.add_expense(
+                expense_date.isoformat(),
+                expense_category,
+                expense_subcategory,
+                expense_description,
+                float(expense_amount)
+            )
+            # Add to session state
             new_expense = {
+                "id": expense_id,
                 "date": expense_date.isoformat(),
                 "category": expense_category,
                 "subcategory": expense_subcategory,
@@ -375,7 +330,6 @@ with st.sidebar:
                 "amount": float(expense_amount)
             }
             st.session_state.expenses.append(new_expense)
-            save_expenses(st.session_state.expenses)
             st.success(f"Added ₹{expense_amount:.2f} for {expense_description}!")
             st.rerun()
         else:
@@ -391,13 +345,20 @@ with st.sidebar:
     
     if st.button("Add Credit", type="primary", key="add_credit"):
         if credit_amount > 0 and credit_description:
+            # Add to database
+            credit_id = database.add_credit(
+                credit_date.isoformat(),
+                credit_description,
+                float(credit_amount)
+            )
+            # Add to session state
             new_credit = {
+                "id": credit_id,
                 "date": credit_date.isoformat(),
                 "description": credit_description,
                 "amount": float(credit_amount)
             }
             st.session_state.credits.append(new_credit)
-            save_credits(st.session_state.credits)
             st.success(f"Added credit ₹{credit_amount:.2f} for {credit_description}!")
             st.rerun()
         else:
@@ -408,8 +369,8 @@ with st.sidebar:
     # Clear all expenses button
     if st.button("🗑️ Clear All Expenses", type="secondary"):
         if st.session_state.expenses:
+            database.clear_all_expenses()
             st.session_state.expenses = []
-            save_expenses([])
             st.success("All expenses cleared!")
             st.rerun()
 
@@ -580,7 +541,19 @@ if st.session_state.expenses:
                 "amount": row['amount']
             }
             if st.button("🗑️", key=f"delete_{df_idx}_{display_idx}"):
-                # Remove the matching expense from the list
+                # Delete from database
+                if 'id' in row and row['id']:
+                    database.delete_expense(row['id'])
+                else:
+                    # Fallback for expenses without ID
+                    database.delete_expense_by_details(
+                        expense_to_delete['date'],
+                        expense_to_delete['category'],
+                        expense_to_delete['subcategory'],
+                        expense_to_delete['description'],
+                        expense_to_delete['amount']
+                    )
+                # Remove from session state
                 for i, exp in enumerate(st.session_state.expenses):
                     if (exp.get('date') == expense_to_delete['date'] and
                         exp.get('category') == expense_to_delete['category'] and
@@ -588,9 +561,8 @@ if st.session_state.expenses:
                         exp.get('description') == expense_to_delete['description'] and
                         abs(exp.get('amount', 0) - expense_to_delete['amount']) < 0.01):
                         st.session_state.expenses.pop(i)
-                        save_expenses(st.session_state.expenses)
-                        st.rerun()
                         break
+                st.rerun()
     
     # Summary statistics
     with st.expander("📊 Summary Statistics"):
