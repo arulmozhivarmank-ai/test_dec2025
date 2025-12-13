@@ -33,35 +33,14 @@ def login_page():
     """Display login page"""
     st.markdown("""
     <style>
-    .login-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2rem;
-    }
     .login-box {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 3rem;
-        border-radius: 20px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
         max-width: 420px;
-        width: 100%;
-        position: relative;
-        overflow: hidden;
+        margin: 2rem auto;
     }
-    .login-box::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
-    }
+
     h1 {
         text-align: center;
         color: #333;
@@ -119,9 +98,6 @@ def login_page():
     </style>
     """, unsafe_allow_html=True)
     
-    st.markdown('<div class="login-container">', unsafe_allow_html=True)
-    st.markdown('<div class="login-box">', unsafe_allow_html=True)
-
     st.markdown('<h1 class="login-title">💰 CGT Expense Tracker</h1>', unsafe_allow_html=True)
     st.markdown('<div class="login-subtitle">Secure access to your financial dashboard</div>', unsafe_allow_html=True)
     st.markdown("---")
@@ -173,9 +149,7 @@ def login_page():
                     database.update_credentials(change_userid, new_password)
                     st.success("✅ Password changed successfully! Please login with your new password.")
                     st.session_state.show_change_password = False
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+
 
 # Check authentication
 if not st.session_state.authenticated:
